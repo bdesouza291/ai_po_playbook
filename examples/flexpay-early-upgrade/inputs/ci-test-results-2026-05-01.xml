@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Fictional CI export (JUnit XML), main branch, 1 May 2026. Test names start with the scenario ID. -->
+<testsuites name="flexplan-web" tests="29" failures="0" skipped="1" timestamp="2026-05-01T06:12:44">
+  <testsuite name="SettlementCard" tests="11">
+    <testcase classname="SettlementCard.Eligibility" name="SET.010.010.010 - eligible customer sees the card" time="1.82"/>
+    <testcase classname="SettlementCard.Eligibility" name="SET.010.010.020 - three months remaining shows end-of-contract offer" time="1.40"/>
+    <testcase classname="SettlementCard.Eligibility" name="SET.010.010.030 - card shown in My device" time="1.66"/>
+    <testcase classname="SettlementCard.Eligibility" name="SET.010.010.040 - four months remaining shows the card" time="1.37"/>
+    <testcase classname="SettlementCard.Content" name="SET.010.020.010 - card shows amount valid-until and months remaining" time="0.91"/>
+    <testcase classname="SettlementCard.Freshness" name="SET.010.030.010 - figure requested from Agreement Service on load" time="0.44"/>
+    <testcase classname="SettlementCard.Freshness" name="SET.010.030.020 - same figure on a repeat view the same day" time="0.52"/>
+    <testcase classname="SettlementCard.MultipleAgreements" name="SET.010.040.010 - two agreements show two labelled cards" time="1.71"/>
+    <testcase classname="SettlementCard.MultipleAgreements" name="SET.010.040.020 - one eligible one in arrears" time="1.68"/>
+    <testcase classname="SettlementStatement" name="SET.020.010.010 - PDF has amount validity agreement number and device" time="2.35"/>
+    <testcase classname="UpgradeJourney" name="SET.020.020.010 - figure matches at order summary" time="3.02"/>
+  </testsuite>
+  <testsuite name="UpgradeJourney" tests="1">
+    <testcase classname="UpgradeJourney" name="SET.020.020.020 - order blocked when Agreement Service is down" time="2.11"/>
+  </testsuite>
+  <testsuite name="ErrorAndIneligibleStates" tests="7">
+    <testcase classname="ErrorStates" name="SET.030.020.010 - arrears shows no figure and support message" time="1.59"/>
+    <testcase classname="ErrorStates" name="SET.030.020.020 - dispute shows no figure and case team message" time="1.48"/>
+    <testcase classname="ErrorStates" name="SET.030.030.010 - timeout at 3s shows error and phone number" time="3.21"/>
+    <testcase classname="ErrorStates" name="SET.030.030.020 - malformed amount treated as error" time="0.38"/>
+    <testcase classname="ErrorStates" name="SET.030.030.030 - error event fires with reason">
+      <skipped message="Tag manager not loaded in headless CI; checked manually in the analytics debugger"/>
+    </testcase>
+    <testcase classname="ErrorStates" name="support-flagged agreement shows arrears message" time="1.52"/>
+    <testcase classname="HelpRoute" name="SET.030.010.010 - struggling to pay route visible" time="1.12"/>
+  </testsuite>
+  <testsuite name="HelpRoute" tests="1">
+    <testcase classname="HelpRoute" name="SET.030.010.020 - help route shown when the card errors" time="1.30"/>
+  </testsuite>
+  <testsuite name="Analytics" tests="4">
+    <testcase classname="Analytics" name="SET.040.020.010 - no amounts or agreement numbers in any event" time="0.77"/>
+    <testcase classname="Analytics" name="SET.040.020.020 - view events fire once" time="0.81"/>
+    <testcase classname="Analytics" name="SET.040.020.030 - download event fires once per download" time="0.69"/>
+    <testcase classname="Analytics" name="SET.040.020.040 - help click event fires" time="0.58"/>
+  </testsuite>
+  <testsuite name="Experiment" tests="2">
+    <testcase classname="Experiment" name="SET.040.030.010 - assignment stable across devices" time="0.95"/>
+    <testcase classname="Experiment" name="SET.040.030.020 - daily assignment export complete" time="4.40"/>
+  </testsuite>
+  <testsuite name="NonFunctional" tests="3">
+    <testcase classname="Audit" name="NFR-03.010 - generated figure is logged" time="0.62"/>
+    <testcase classname="Audit" name="NFR-03.020 - no figure when audit store is down" time="0.71"/>
+    <testcase classname="Performance" name="NFR-01.010 - p95 figure or error within 3s on 4G profile" time="41.20"/>
+  </testsuite>
+</testsuites>

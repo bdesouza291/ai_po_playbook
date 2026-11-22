@@ -1,0 +1,7 @@
+segment,step,unique_customers
+mid_contract,visited_upgrade_hub,30000
+mid_contract,saw_call_us_for_settlement_message,27100
+mid_contract,clicked_call_us,4100
+mid_contract,upgraded_any_channel_within_30_days,1500
+final_3_months,visited_upgrade_hub,21000
+final_3_months,upgraded_any_channel_within_30_days,3050

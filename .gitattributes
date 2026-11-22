@@ -1,0 +1,10 @@
+# Keep LF everywhere. scripts/pdlc.py writes LF when it approves or reopens an
+# artefact; mixed CRLF/LF would turn every sign-off into a whole-file diff.
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.pdf binary
+*.docx binary
+*.xlsx binary
+*.zip binary

@@ -1,0 +1,11 @@
+# Initiatives are ignored in the TEMPLATE so it stays clean.
+# In a copy you use for a real project, delete the next two lines so your
+# artefacts, approvals log and decisions are version-controlled.
+work/*
+!work/.gitkeep
+
+.claude/settings.local.json
+__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db

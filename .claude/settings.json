@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(python3 scripts/pdlc.py status*)",
+      "Bash(python3 scripts/pdlc.py check *)",
+      "Bash(python3 scripts/pdlc.py stages*)",
+      "Bash(python3 scripts/pdlc.py init *)",
+      "Bash(python3 scripts/pdlc.py trace *)",
+      "Bash(python3 scripts/pdlc.py context-check*)",
+      "Bash(python scripts/pdlc.py status*)",
+      "Bash(python scripts/pdlc.py check *)",
+      "Bash(python scripts/pdlc.py stages*)",
+      "Bash(python scripts/pdlc.py init *)",
+      "Bash(python scripts/pdlc.py trace *)",
+      "Bash(python scripts/pdlc.py context-check*)",
+      "PowerShell(python3 scripts/pdlc.py status*)",
+      "PowerShell(python3 scripts/pdlc.py check *)",
+      "PowerShell(python3 scripts/pdlc.py stages*)",
+      "PowerShell(python3 scripts/pdlc.py init *)",
+      "PowerShell(python3 scripts/pdlc.py trace *)",
+      "PowerShell(python3 scripts/pdlc.py context-check*)",
+      "PowerShell(python scripts/pdlc.py status*)",
+      "PowerShell(python scripts/pdlc.py check *)",
+      "PowerShell(python scripts/pdlc.py stages*)",
+      "PowerShell(python scripts/pdlc.py init *)",
+      "PowerShell(python scripts/pdlc.py trace *)",
+      "PowerShell(python scripts/pdlc.py context-check*)",
+      "Bash(python3 scripts/pdlc.py story *)",
+      "Bash(python scripts/pdlc.py story *)",
+      "PowerShell(python3 scripts/pdlc.py story *)",
+      "PowerShell(python scripts/pdlc.py story *)"
+    ],
+    "ask": [
+      "Bash(python3 scripts/pdlc.py approve *)",
+      "Bash(python3 scripts/pdlc.py reopen *)",
+      "Bash(python3 scripts/pdlc.py override *)",
+      "Bash(python scripts/pdlc.py approve *)",
+      "Bash(python scripts/pdlc.py reopen *)",
+      "Bash(python scripts/pdlc.py override *)",
+      "PowerShell(python3 scripts/pdlc.py approve *)",
+      "PowerShell(python3 scripts/pdlc.py reopen *)",
+      "PowerShell(python3 scripts/pdlc.py override *)",
+      "PowerShell(python scripts/pdlc.py approve *)",
+      "PowerShell(python scripts/pdlc.py reopen *)",
+      "PowerShell(python scripts/pdlc.py override *)",
+      "Bash(python3 scripts/pdlc.py track *)",
+      "Bash(python scripts/pdlc.py track *)",
+      "PowerShell(python3 scripts/pdlc.py track *)",
+      "PowerShell(python scripts/pdlc.py track *)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit|NotebookEdit|Bash|PowerShell",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if command -v python3 >/dev/null 2>&1; then python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/guard.py\"; else python \"$CLAUDE_PROJECT_DIR/.claude/hooks/guard.py\"; fi"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,6 @@
+Date,Scenario ID,Check,Tool,Tester,Result,Notes
+2026-02-10,SET.010.020.020,Card read by screen reader,NVDA 2025.3 + VoiceOver iOS 19,QA,Passed,Amount date and months read in order; contrast AA
+2026-02-10,SET.020.010.020,Statement PDF tagged with logical reading order,PAC 2024,QA,Passed,
+2026-02-10,SET.020.010.030,Download statement by keyboard only,Chrome + Safari,QA,Passed,
+2026-02-11,SET.030.010.030,Help link text makes sense out of context,NVDA links list,QA,Passed,
+2026-02-11,SET.030.030.030,settlement_figure_error fires with reason (arrears / dispute / timeout),Analytics debugger,QA,Passed,Automated test skipped in CI; see PR #203

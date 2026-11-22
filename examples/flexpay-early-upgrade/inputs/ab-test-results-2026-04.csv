@@ -1,0 +1,3 @@
+arm,enrolled_customers,upgraded_within_30_days,settlement_contacts_per_1000_agreements,port_out_within_30_days_of_view_or_call,settlement_complaints,card_error_rate
+control,15100,770,17.6,9.1%,41,n/a
+treatment,15050,933,11.6,9.8%,39,1.2%
