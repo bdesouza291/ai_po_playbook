@@ -172,6 +172,3 @@ docs/            cheatsheet, playbook, design notes, setup guide
 CHANGELOG.md     template version history
 ```
 
-## Provenance
-
-The lifecycle, agents and enforced sign-off come from the original PO Agent Kit. The artefact discipline grafted in here — stable requirement IDs, BDD acceptance writing rules, the requirement→story→test traceability chain, the richer status legend, and the coverage/traceability/three-amigos/glossary agents — is adapted from **CompanyName_placeholder's AI-augmented PDLC** (a GitHub Copilot implementation), translated into Claude Code's agents-and-skills format.
