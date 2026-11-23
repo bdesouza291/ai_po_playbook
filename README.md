@@ -18,29 +18,10 @@ AI can draft a PRD or forty stories in minutes. That's only useful if the drafts
 
 ## How it works
 
-```mermaid
-flowchart LR
-  B[00 Brief<br/>PO writes] --> D[01 Discovery]
-  D --> O[02 Opportunity]
-  O --> P[03 Prioritisation]
-  P --> R[04 PRD]
-  R --> M[05 Metrics plan]
-  R --> S[06 Backlog]
-  M --> S
-  S --> T[07 Test scenarios]
-  S --> F[08 Refinement pack]
-  T --> F
-  S --> L[09 Release plan]
-  T --> L
-  M --> L
-  L --> C[10 Comms]
-  L --> Q[11 Post-launch review]
-  M --> Q
-  F --> H[Build spec<br/>per story]
-  H -.-> X[Build<br/>dev team or AI agent]
-  X -.-> Z[12 Close report]
-  T --> Z
-```
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/lifecycle-dark.png">
+  <img src="assets/lifecycle-light.png" width="800" alt="A step-by-step lifecycle for the AI Product Owner template: set up the workbench, discover and decide, draft and refine, then hand off, build and close.">
+</picture>
 
 Each box is drafted by an agent and approved by the PO. A solid arrow means "can't start until the upstream box is approved". The build itself happens outside the kit, from approved build specs. One initiative = one folder under `work/<slug>/`.
 
@@ -187,6 +168,7 @@ scripts/
 work/            your initiatives
 examples/        the worked FlexPlan run, with its own context snapshot
 docs/            cheatsheet, playbook, design notes, setup guide
+assets/          README lifecycle images and image generator
 CHANGELOG.md     template version history
 LICENSE.md       MIT license
 ```

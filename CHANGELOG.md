@@ -5,6 +5,7 @@ Version history of this template. When you copy the template for a project, note
 ## Unreleased
 
 ### Added
+- Light and dark lifecycle images for the README, with a reproducible Pillow generator in `assets/`.
 - `/start-here` entry point for routing a new or returning session to the next Product Owner action.
 - `/handover` and `/retro` skills for session continuity and durable setup improvements.
 - `AGENTS.md` with repository-maintenance rules for Claude and other coding agents.
