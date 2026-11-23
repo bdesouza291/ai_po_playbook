@@ -62,7 +62,7 @@ First version of the template, built from the PO Agent Kit.
 
 ### Added
 - Stable requirement IDs (`<AREA>.<GROUP>.<ITEM>`) and BDD acceptance in the PRD, backlog and test-scenario templates, with BDD writing rules.
-- Agents ported from CompanyName_placeholder's PDLC: `acceptance-coverage-check`, `traceability-report`, `three-amigos-facilitator`, `glossary-sync`. Commands: `/coverage`, `/trace`, `/three-amigos`.
+- Agents adapted from established PDLC practices: `acceptance-coverage-check`, `traceability-report`, `three-amigos-facilitator`, `glossary-sync`. Commands: `/coverage`, `/trace`, `/three-amigos`.
 - `context/status-legend.md`, `context/policies/`, and `.claude/agents/AGENTS-OVERVIEW.md`.
 - The worked example migrated to stable IDs (area code `SET`).
 

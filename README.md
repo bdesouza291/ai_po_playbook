@@ -1,10 +1,13 @@
 # AI Product Owner — template repo
 
+[![Template tests](https://github.com/bdesouza291/ai_po_playbook/actions/workflows/tests.yml/badge.svg)](https://github.com/bdesouza291/ai_po_playbook/actions/workflows/tests.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE.md)
+
 **A reusable Claude Code workbench for Product Owners. Specialist agents draft every artefact across the product development lifecycle; you sign off each one; the tooling enforces the gates.**
 
 This is a *template*. Clone it per project or role, swap the context files for your product and team, and run. The agents, templates, gates and traceability stay the same.
 
-It builds on an earlier worked kit (the FlexPlan example below) and folds in artefact-discipline from CompanyName_placeholder's AI-augmented PDLC: **stable requirement IDs, BDD acceptance, and an explicit requirement → story → test traceability chain.**
+It builds on an earlier worked kit (the FlexPlan example below) and folds in artefact discipline from an AI-augmented PDLC: **stable requirement IDs, BDD acceptance, and an explicit requirement → story → test traceability chain.**
 
 *Based on work by Breitner de Souza Eremita, Product Owner, London.*
 
@@ -83,7 +86,7 @@ Test scenario  UPG.010.010.010
 | `build-spec-writer` | Self-contained build spec per story for developers or AI coding agents | `/handoff` |
 | `close-analyst` | Delivery vs PRD from test evidence; drift; follow-up stories | `/close` |
 
-The four in **bold** are adapted from CompanyName_placeholder's PDLC agents into Claude Code format. All 18 agents are described, with when to use each, in the [agents overview](.claude/agents/AGENTS-OVERVIEW.md).
+The four in **bold** adapt established PDLC agent patterns into Claude Code format. All 18 agents are described, with when to use each, in the [agents overview](.claude/agents/AGENTS-OVERVIEW.md).
 
 Plus `/onboard`, `/new-initiative`, `/track`, `/status`, `/next`, `/approve`, `/reopen`, `/override`, `/ask-agent`, `/setup-check`.
 

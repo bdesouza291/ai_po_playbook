@@ -4,7 +4,7 @@ Two things track status in this kit, and they are deliberately separate:
 
 1. **The sign-off ledger** (`scripts/pdlc.py`) is the source of truth for the gate. It only knows two states that matter for gating: **DRAFT** and **APPROVED** (plus the derived `CHANGED SINCE APPROVAL` and `STALE` flags). Nothing moves downstream until the upstream artefact is APPROVED in the ledger.
 
-2. **The `Status` line a human reads** inside each artefact can be more expressive, to show where a draft is socially. The richer vocabulary below is adapted from CompanyName_placeholder's PDLC. Use it in the body/header of an artefact for communication; it never changes the gate — only `/approve` does that.
+2. **The `Status` line a human reads** inside each artefact can be more expressive, to show where a draft is socially. The richer vocabulary below is adapted from established PDLC practice. Use it in the body/header of an artefact for communication; it never changes the gate — only `/approve` does that.
 
 > Rule of thumb: the ledger says *can the next stage start?*; the status word says *how settled is this draft?*
 

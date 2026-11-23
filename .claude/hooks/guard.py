@@ -103,6 +103,8 @@ def main():
 
 def resolve(token, cwd):
     token = token.strip("'\"")
+    # Accept Windows-style paths when the guard is tested or hosted on POSIX.
+    token = token.replace("\\", "/")
     return token if os.path.isabs(token) else os.path.join(cwd, token)
 
 
