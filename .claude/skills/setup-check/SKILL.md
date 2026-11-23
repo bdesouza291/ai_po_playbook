@@ -16,5 +16,6 @@ Run these checks and report a short pass / fail table.
 8. **Traceability.** Run `python3 scripts/pdlc.py trace flexpay-early-upgrade`. Expected verdict: READY.
 9. **Context.** Run `python3 scripts/pdlc.py context-check`. In a fresh copy of the template the REQUIRED files will show placeholders. That isn't a failure, but tell the PO to run `/onboard` before starting real work.
 10. **Permission prompt.** Explain that the first time `/approve` runs, Claude Code should ask permission for `pdlc.py approve`. If it doesn't ask, check the PO isn't in bypass-permissions mode.
+11. **Template validator.** Run `python3 scripts/validate_template.py`. Expected: every skill mirror, release evidence fields and Python file parses. This is the cross-agent and CI structure check.
 
 End with one line: ready, or what to fix.

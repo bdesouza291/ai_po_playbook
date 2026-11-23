@@ -1,0 +1,27 @@
+name: Template tests
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Validate template
+        run: python3 scripts/validate_template.py
+      - name: Test PDLC ledger
+        run: python3 scripts/test_pdlc.py
+      - name: Test sign-off guard
+        run: python3 scripts/test_guard.py
+      - name: Check context
+        run: python3 scripts/pdlc.py context-check
+      - name: Check worked example traceability
+        run: python3 scripts/pdlc.py trace flexpay-early-upgrade

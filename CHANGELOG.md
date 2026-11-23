@@ -2,6 +2,18 @@
 
 Version history of this template. When you copy the template for a project, note the version you started from, so you can tell which later improvements are worth pulling in.
 
+## Unreleased
+
+### Added
+- `/start-here` entry point for routing a new or returning session to the next Product Owner action.
+- `/handover` and `/retro` skills for session continuity and durable setup improvements.
+- `AGENTS.md` with repository-maintenance rules for Claude and other coding agents.
+- Cross-agent skill mirror under `.agents/skills/`.
+- `scripts/validate_template.py` for skill mirrors, release evidence fields and Python syntax.
+- `.github/workflows/tests.yml` for template validation and the PDLC and guard regression suites.
+- MIT `LICENSE.md`.
+- Release-plan evidence fields for the reviewed build, independent review, intended-versus-implemented, optional deeper audits, and promotion verification.
+
 ## [1.2.0] - 2026-11-21
 
 Closes the loop with the people and agents who build it, and stops small work paying for twelve gates.

@@ -18,6 +18,23 @@ approved_hash:
 |---|---|---|---|---|
 
 ## Feature flags and kill switch
+
+## Reviewed build and independent evidence
+| Evidence | Commit / build | Result | Source |
+|---|---|---|---|
+| Independent review | <commit or build reviewed> | <pass / findings> | <review report> |
+| Intended vs implemented | <commit or build reviewed> | <agree / disagreements> | <review report or PRD links> |
+| Security review | <commit or build reviewed> | <not requested / pass / findings> | <audit report> |
+| Performance review | <commit or build reviewed> | <not requested / pass / findings> | <audit report> |
+
+## Promotion record
+- **Candidate build / commit:** <exact reviewed build>
+- **Human go / no-go:** <GO / NO-GO / awaiting explicit decision>
+- **Decision by:** <name>
+- **Decision at:** <date and time>
+- **Promoted build / commit:** <exact build serving after promotion>
+- **Post-promotion verification:** <smoke test, metrics or link>
+
 ## Go / no-go checklist
 | Area | Check | Owner | Status |
 |---|---|---|---|

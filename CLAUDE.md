@@ -2,6 +2,8 @@
 
 This project is a Product Owner's workbench. Specialist subagents in `.claude/agents/` draft artefacts across the product development lifecycle (PDLC). **The human Product Owner signs off every artefact.** Nothing is automated end to end.
 
+For repository-maintenance rules that apply to all coding agents, also read `AGENTS.md`.
+
 ## The golden rule
 Agents draft. The PO approves. You never approve, reopen, override or change an initiative's track on the PO's behalf.
 - Only `scripts/pdlc.py` changes sign-off status. Claude Code asks the PO before running `approve`, `reopen`, `override` or `track`.

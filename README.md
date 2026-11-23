@@ -131,14 +131,27 @@ It runs right through to close-out:
 You need the Claude Code desktop app (or CLI) and Python 3.8+.
 
 1. Clone this folder and open **this folder** as the project in Claude Code. The guard and permission rules only apply when it is the project root, not a parent folder.
-2. Run `/setup-check`. It confirms that Python, the ledger and the sign-off guard work (Bash and PowerShell).
-3. **Make it yours:** run `/onboard`. It interviews you to fill in the product and team context, and you can paste existing material instead of typing. Filled-in examples are in the context-snapshot folder. Drop any policy docs into `context/policies/`. Until the required context is filled, every stage gate shows a warning.
-4. `/new-initiative my-idea "One line about it"` and answer the brief questions.
-5. Put evidence in `work/my-idea/inputs/`, `/approve` the brief, then `/discover my-idea`. From there `/next my-idea` tells you what's next.
+2. Run `/start-here`. It checks repository state and recommends the next action.
+3. Run `/setup-check`. It confirms that Python, the ledger and the sign-off guard work (Bash and PowerShell).
+   Run `python scripts/validate_template.py` to check skill mirrors and the template's local structure.
+4. **Make it yours:** run `/onboard`. It interviews you to fill in the product and team context, and you can paste existing material instead of typing. Filled-in examples are in the context-snapshot folder. Drop any policy docs into `context/policies/`. Until the required context is filled, every stage gate shows a warning.
+5. `/new-initiative my-idea "One line about it"` and answer the brief questions.
+6. Put evidence in `work/my-idea/inputs/`, `/approve` the brief, then `/discover my-idea`. From there `/next my-idea` tells you what's next.
 
 ## Using it in a new role
 
 Swap the context files on day one — product, customers, systems, team, DoR/DoD, regulatory areas, policies. Everything else stays. Templates are plain Markdown, so output pastes into Jira, Azure DevOps, Confluence or Notion.
+
+## Cross-agent use
+
+The Claude skill definitions are maintained under `.claude/skills/` and mirrored under `.agents/skills/` for agents that use the `.agents` skill format.
+
+- Read `AGENTS.md` for repository-maintaining rules.
+- Read `CLAUDE.md` for Claude-specific stage routing and the approval protocol.
+- Run `python scripts/validate_template.py` after adding or changing a skill.
+- Keep real approval actions in the human-controlled ledger commands; a mirrored skill must not approve by itself.
+
+GitHub Actions runs the template validator and both regression suites on pushes and pull requests.
 
 ## Limits worth knowing
 
@@ -155,7 +168,11 @@ Swap the context files on day one — product, customers, systems, team, DoR/DoD
   skills/        slash commands (stages + /onboard, /track, /handoff, /close, /trace, /coverage, …)
   hooks/         guard.py (sign-off guard)
   settings.json  permission rules and hook wiring
+.agents/
+  README.md      cross-agent skill mirror instructions
+  skills/        mirror of the Claude skill definitions
 CLAUDE.md        orchestration rules, stable-ID discipline
+AGENTS.md        repository-maintenance rules for all coding agents
 context/
   product-context, team, writing-style, regulatory-notes, quality-rubrics,
   glossary, status-legend
@@ -166,9 +183,11 @@ scripts/
                  trace (+ --evidence), story (verbatim extract), context-check
   test_guard.py  proves the sign-off guard's rules (run by /setup-check)
   test_pdlc.py   regression tests for the ledger: tracks, gates, build specs, evidence
+  validate_template.py  validates skill mirrors, release evidence fields and Python syntax
 work/            your initiatives
 examples/        the worked FlexPlan run, with its own context snapshot
 docs/            cheatsheet, playbook, design notes, setup guide
 CHANGELOG.md     template version history
+LICENSE.md       MIT license
 ```
 
