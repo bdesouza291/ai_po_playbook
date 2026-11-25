@@ -6,17 +6,18 @@ For repository-maintenance rules that apply to all coding agents, also read `AGE
 
 ## The golden rule
 Agents draft. The PO approves. You never approve, reopen, override or change an initiative's track on the PO's behalf.
-- Only `scripts/pdlc.py` changes sign-off status. Claude Code asks the PO before running `approve`, `reopen`, `override` or `track`.
+- Only the ledger script (`scripts/pdlc`, which runs `scripts/pdlc.py`) changes sign-off status. Claude Code asks the PO before running `approve`, `reopen`, `override` or `track`.
 - Only run those four sub-commands when the PO has invoked `/approve`, `/reopen`, `/override` or `/track` in the current turn.
 - A hook (`.claude/hooks/guard.py`) blocks edits to APPROVED files and blocks writing `status: APPROVED`. Do not try to work around it. If it blocks you, tell the PO what you were trying to do.
 - If the PO asks whether to tick "don't ask again" on an approval prompt, recommend against it.
 
 ## Python
-Use `python3 scripts/pdlc.py ...`. If `python3` is not found (common on Windows), use `python scripts/pdlc.py ...` for the rest of the session.
+Run the ledger through the wrapper, which finds a working Python itself: `scripts/pdlc ...` from Bash, `scripts/pdlc.cmd ...` from PowerShell. Always use exactly those spellings: the permission rules in `.claude/settings.json` match them literally, so `python scripts/pdlc.py ...` would prompt every time. Never pass `--by`; the ledger records the Product Owner named in `context/team-and-ways-of-working.md`.
 
 ## Stage map
-Each initiative lives in `work/<slug>/`. A stage can start only when its upstream artefacts are APPROVED. The table shows the **full** track; `python3 scripts/pdlc.py stages --track <full|lite>` prints the effective gates for either.
+Each initiative lives in `work/<slug>/`. A stage can start only when its upstream artefacts are APPROVED. The table shows the **full** track (the opt-in flow; new initiatives start on **lite**); `scripts/pdlc stages --track <full|lite>` prints the effective gates for either.
 
+<!-- GENERATED from STAGES in scripts/pdlc.py. Do not edit by hand: run `scripts/pdlc stages --table` and paste the output. validate_template.py fails if this table drifts. -->
 | Stage | Command | Agent | Output | Needs approved |
 |---|---|---|---|---|
 | brief | `/new-initiative` | PO, helped by you | `00-brief.md` | - |
@@ -38,8 +39,8 @@ Supporting commands: `/onboard`, `/track`, `/status`, `/next`, `/critique`, `/ap
 
 ## Tracks
 Each initiative runs on a track, chosen at `/new-initiative` and changed only by the PO with `/track`. It is recorded in the approvals log.
-- **full**: all stages above.
-- **lite**: brief > PRD > backlog > test > close (+ handoff). A skipped stage's upstream passes straight through: the PRD gates on the brief, the backlog on the PRD, and handoff on backlog and test.
+- **lite** (the default for a new initiative): brief > PRD > backlog > test > close (+ handoff). A skipped stage's upstream passes straight through: the PRD gates on the brief, the backlog on the PRD, and handoff on backlog and test.
+- **full**: all stages above. A deliberate choice for customer-facing, regulated or experiment-driven work, or anything needing stakeholder comms. An initiative whose log has no TRACK row predates tracks and is treated as full.
 - On lite, the agent for a stage may expect an upstream artefact that doesn't exist (for example, the `prd-writer` expects an opportunity and prioritisation). Tell it which stages were skipped. It works from the brief and `inputs/`, and marks missing goals, baselines, targets or scope decisions `[[OPEN]]` rather than inventing them.
 
 ## Build specs and close-out
@@ -50,7 +51,7 @@ Each initiative runs on a track, chosen at `/new-initiative` and changed only by
 
 Quality and traceability helpers (read-only; they propose, the PO decides):
 - `/coverage <slug>` → `acceptance-coverage-check`: gaps, ambiguity and BDD issues in the PRD, before sign-off.
-- `/trace <slug>` → `python3 scripts/pdlc.py trace <slug>` (code-based coverage, gaps, orphans, area-code clashes); `--deep` adds the `traceability-report` agent's judgement on top. Trust the script's numbers; don't recount coverage by reading the files.
+- `/trace <slug>` → `scripts/pdlc trace <slug>` (code-based coverage, gaps, orphans, area-code clashes); `--deep` adds the `traceability-report` agent's judgement on top. Trust the script's numbers; don't recount coverage by reading the files.
 - `/three-amigos <slug> <id>` → `three-amigos-facilitator`: a structured deep-dive on one story or requirement.
 - `glossary-sync` (via `/ask-agent`): proposes glossary additions from an artefact.
 
@@ -69,7 +70,7 @@ Status vocabulary (the social state of a draft vs. the ledger gate) is defined i
 
 ## Stage run protocol (every stage command follows this)
 1. **Find the initiative.** `work/<slug>/` (or `examples/<slug>/` for the worked example). If the slug is missing or unknown, run `pdlc.py status` and ask which one.
-2. **Check the gate.** Run `python3 scripts/pdlc.py check <slug> <stage>` (for a build spec: `check <slug> handoff --story <story-id>`). When the gate opens, it also prints `TRACK:` and `UPSTREAM:` lines; use them in step 3.
+2. **Check the gate.** Run `scripts/pdlc check <slug> <stage>` (for a build spec: `check <slug> handoff --story <story-id>`). When the gate opens, it also prints `TRACK:` and `UPSTREAM:` lines; use them in step 3.
    - `GATE BLOCKED`: stop. Tell the PO what is missing and which command fixes it (`/approve`, or `/override` with a reason if they really want to skip ahead).
    - `GATE OPEN (OVERRIDE ...)`: continue, and remind the PO the upstream isn't approved.
    - `GATE OPEN ... NEW DRAFT`: continue.

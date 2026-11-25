@@ -1,0 +1,11 @@
+#!/bin/sh
+# Thin wrapper: finds a working Python and runs scripts/pdlc.py with the same arguments.
+# Exists so permission rules (and people) have one command to use, whatever the interpreter is called.
+d=$(dirname "$0")
+for py in python3 python py; do
+  if command -v "$py" >/dev/null 2>&1 && "$py" -c "import sys" >/dev/null 2>&1; then
+    exec "$py" "$d/pdlc.py" "$@"
+  fi
+done
+echo "pdlc: no working Python (python3, python or py) found on PATH." >&2
+exit 127

@@ -39,7 +39,16 @@ CASES = [
     ("Bash grep PRD into new file",        "Bash", {"command": "grep SET {}/04-prd.md > out.txt".format(EX)}, 0),
     ("PS read approved PRD",               "PowerShell", {"command": "Get-Content {}/04-prd.md".format(EX)}, 0),
     ("PS ledger approve (prompt decides)", "PowerShell", {"command": 'python scripts/pdlc.py approve work/x/04-prd.md --by "PO"'}, 0),
-    ("Bash write a draft note",            "Bash", {"command": "echo hi > work/notes.md"}, 0),
+    ("Bash write prefixed before pdlc.py", "Bash", {"command": "sed -i 's/x/y/' {}/04-prd.md ; python3 scripts/pdlc.py status".format(EX)}, 2),
+    ("Bash pdlc.py then write to PRD",     "Bash", {"command": "python3 scripts/pdlc.py status ; sed -i 's/x/y/' {}/04-prd.md".format(EX)}, 2),
+    ("Bash bare pdlc.py status",           "Bash", {"command": "python3 scripts/pdlc.py status"}, 0),
+    ("Bash bare pdlc.py approve",          "Bash", {"command": 'python3 scripts/pdlc.py approve work/x/04-prd.md --by "PO"'}, 0),
+    ("Bash write prefixed before wrapper", "Bash", {"command": "sed -i 's/x/y/' {}/04-prd.md ; scripts/pdlc status".format(EX)}, 2),
+    ("PS write prefixed before wrapper",   "PowerShell", {"command": "Add-Content {}/04-prd.md x; scripts/pdlc.cmd status".format(EX)}, 2),
+    ("Bash bare wrapper status",           "Bash", {"command": "scripts/pdlc status"}, 0),
+    ("Bash bare wrapper approve",          "Bash", {"command": "scripts/pdlc approve work/x/04-prd.md"}, 0),
+    ("PS bare wrapper approve",            "PowerShell", {"command": "scripts/pdlc.cmd approve work/x/04-prd.md"}, 0),
+    ("Bash write a draft note",          "Bash", {"command": "echo hi > work/notes.md"}, 0),
     ("Write a normal draft",               "Write", {"file_path": os.path.join(REPO, "work", "y.md"), "content": "---\nstatus: DRAFT\n---\n"}, 0),
 ]
 

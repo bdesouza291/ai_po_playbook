@@ -5,7 +5,7 @@ argument-hint: <slug>
 disable-model-invocation: true
 ---
 
-1. Run `python3 scripts/pdlc.py status $ARGUMENTS`.
+1. Run `scripts/pdlc status $ARGUMENTS`.
 2. Read the "Next:" line.
    - If a DRAFT is waiting for sign-off, summarise it in three lines (read the file) and ask: approve, revise, or critique first?
    - If a stage is ready to run, name the command and ask the PO whether to run it now.

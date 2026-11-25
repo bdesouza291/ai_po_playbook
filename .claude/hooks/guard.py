@@ -37,7 +37,8 @@ MODIFIES_NAMED = re.compile(
 # Commands that only modify their last argument (the copy destination).
 COPIES = re.compile(r"(\bcp\b|Copy-Item)", re.I)
 REDIRECT_TARGET = re.compile(r"(?<![0-9&])>>?\s*['\"]?([^\s'\";|&<>]+)")
-MD_PATH = re.compile(r"['\"]?([^\s'\";|&<>()]+\.md)\b['\"]?", re.I)
+PDLC_ONLY = re.compile(r"\s*(?:(?:python3?|py)\s+)?(?:\./)?scripts[/\\]pdlc(?:\.py|\.cmd)?(?=\s|$)", re.I)
+MD_PATH =re.compile(r"['\"]?([^\s'\";|&<>()]+\.md)\b['\"]?", re.I)
 
 
 def block(msg):
@@ -86,8 +87,8 @@ def main():
 
     elif tool in SHELL_TOOLS:
         cmd = ti.get("command", "")
-        if re.search(r"scripts[/\\]pdlc\.py", cmd) and not re.search(r"[;&|]\s*\S", cmd.split("pdlc.py", 1)[1]):
-            sys.exit(0)  # the ledger script on its own; permission rules decide whether to ask
+        if PDLC_ONLY.match(cmd) and not re.search(r"[;&|\n\r]", cmd):
+            sys.exit(0)  # a single, bare pdlc.py call; permission rules decide whether to ask
         touches_signoff = re.search(r"status:\s*APPROVED|approved_by|approved_hash|" + re.escape(LEDGER), cmd, re.I)
         if touches_signoff and WRITEY_SHELL.search(cmd):
             block("shell commands may not change sign-off fields or the approvals log. Use /approve or /reopen.")

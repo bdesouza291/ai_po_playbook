@@ -8,7 +8,7 @@ disable-model-invocation: true
 Arguments: `$ARGUMENTS`.
 
 1. Use the first argument as the initiative slug.
-2. Run `python3 scripts/pdlc.py status <slug>`.
+2. Run `scripts/pdlc status <slug>`.
 3. Read the initiative artefacts, approvals log and any relevant input files.
 4. Write `work/<slug>/handover.md` with:
    - objective

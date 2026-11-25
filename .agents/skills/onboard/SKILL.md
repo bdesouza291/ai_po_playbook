@@ -7,7 +7,7 @@ disable-model-invocation: true
 
 Fill in the context files that every agent reads before drafting. Default scope is `all`; `$ARGUMENTS` can narrow it to `product`, `team` or `regulatory`.
 
-1. Run `python3 scripts/pdlc.py context-check` (or `python ...` on Windows) and show the PO which files still have placeholders. Do the REQUIRED files first: `context/product-context.md`, then `context/team-and-ways-of-working.md`.
+1. Run `scripts/pdlc context-check` (or `python ...` on Windows) and show the PO which files still have placeholders. Do the REQUIRED files first: `context/product-context.md`, then `context/team-and-ways-of-working.md`.
 2. For each file, work through its headings in order. Ask **one question at a time**, using AskUserQuestion with sensible options where the answer is a choice (sprint length, estimation method, accessibility bar), free text otherwise. Offer to paste in existing material instead: a strategy deck, a team wiki page, a Definition of Done. If they paste, extract the answers from it and confirm them.
 3. Write the answers into the file in the PO's own words, replacing each `<placeholder>`. Tidy the grammar only. Don't invent facts, numbers or system names. If the PO says "skip" or "don't know", leave `[[OPEN]]` in place of the placeholder.
 4. Keep what the template says about stable IDs, the Definition of Ready and Done structure, and the guidance notes in `>` quotes, unless the PO asks to change them.

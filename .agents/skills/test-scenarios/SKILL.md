@@ -8,7 +8,7 @@ disable-model-invocation: true
 Run the **test** stage following the *Stage run protocol* in CLAUDE.md.
 
 - Arguments: `$ARGUMENTS` (the first word is the initiative slug; anything after it is the PO's feedback, pass it to the agent word for word)
-- Gate check: `python3 scripts/pdlc.py check <slug> test`
+- Gate check: `scripts/pdlc check <slug> test`
 - Subagent: `qa-scenario-designer`
 - Output: `work/<slug>/07-test-scenarios.md`
 - Template: `templates/07-test-scenarios.md`

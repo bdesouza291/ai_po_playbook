@@ -8,6 +8,5 @@ disable-model-invocation: true
 Arguments: `$ARGUMENTS` (path, then the reason).
 
 1. If no reason was given, ask for one. The reason goes in the approvals log.
-2. Get the PO's name from `context/team-and-ways-of-working.md`.
-3. Run `python3 scripts/pdlc.py reopen <path> --by "<PO name>" --reason "<reason>"` (Claude Code will ask permission).
-4. Show `python3 scripts/pdlc.py status <slug>` and point out any downstream artefacts now flagged, as they may need revisiting too.
+2. Run `scripts/pdlc reopen <path> --reason "<reason>"` (Claude Code will ask permission). Do not pass `--by`; the script records the PO named in the team file.
+3. Show `scripts/pdlc status <slug>` and point out any downstream artefacts now flagged, as they may need revisiting too.

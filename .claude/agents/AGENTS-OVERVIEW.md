@@ -6,7 +6,7 @@ A reference for every subagent defined in this repo: what it is for, when to tri
 >
 > Golden rule throughout: **agents draft, the PO approves.** No agent changes sign-off status; only `/approve`, `/reopen`, `/override` (via `scripts/pdlc.py`) do, and a stage can only start when its upstream artefacts are APPROVED.
 
-## Core stage agents (the 12-stage flow)
+## Core stage agents (the 13-stage flow)
 
 These run one per PDLC stage, each invoked by its slash command, each producing one numbered artefact in `work/<slug>/`.
 
@@ -52,7 +52,7 @@ LITE TRACK
 brief ▶ PRD ▶ backlog ▶ test ▶ handoff (per story) ▶ build ▶ close
 
 "build" is the dev team or an AI coding agent working from approved build specs. It sits outside the kit.
-Exact gates for either track: python3 scripts/pdlc.py stages --track <full|lite>
+Exact gates for either track: scripts/pdlc stages --track <full|lite>
 ```
 
 - **Tracks:** each initiative runs on `full` or `lite`, chosen at `/new-initiative` and changed with `/track`. On lite, skipped stages pass their gate through: the PRD gates on the brief, the backlog on the PRD. Agents are told which stages were skipped and mark missing inputs `[[OPEN]]`.

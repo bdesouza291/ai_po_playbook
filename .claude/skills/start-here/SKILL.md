@@ -7,8 +7,8 @@ disable-model-invocation: true
 
 Arguments: `$ARGUMENTS`.
 
-1. Run `python3 scripts/pdlc.py status` and `python3 scripts/pdlc.py context-check`.
-2. If the argument names an initiative, run `python3 scripts/pdlc.py status <slug>`.
+1. Run `scripts/pdlc status` and `scripts/pdlc context-check`.
+2. If the argument names an initiative, run `scripts/pdlc status <slug>`.
 3. Check for:
    - unfinished context setup
    - drafts waiting for sign-off

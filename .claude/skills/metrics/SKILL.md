@@ -8,7 +8,7 @@ disable-model-invocation: true
 Run the **metrics** stage following the *Stage run protocol* in CLAUDE.md.
 
 - Arguments: `$ARGUMENTS` (the first word is the initiative slug; anything after it is the PO's feedback, pass it to the agent word for word)
-- Gate check: `python3 scripts/pdlc.py check <slug> metrics`
+- Gate check: `scripts/pdlc check <slug> metrics`
 - Subagent: `metrics-analyst`
 - Output: `work/<slug>/05-metrics-plan.md`
 - Template: `templates/05-metrics-plan.md`

@@ -13,19 +13,26 @@ Usage
     python3 scripts/pdlc.py init <slug> --title "Short title"
     python3 scripts/pdlc.py status [<slug>]
     python3 scripts/pdlc.py check <slug> <stage>
-    python3 scripts/pdlc.py approve <path> --by "Name" [--note "..."] [--force]
-    python3 scripts/pdlc.py reopen <path> --by "Name" --reason "..."
-    python3 scripts/pdlc.py override <slug> <stage> --by "Name" --reason "..."
+    python3 scripts/pdlc.py approve <path> [--note "..."] [--force --reason "..."]
+    python3 scripts/pdlc.py reopen <path> --reason "..."
+    python3 scripts/pdlc.py override <slug> <stage> --reason "..."
     python3 scripts/pdlc.py stages
     python3 scripts/pdlc.py trace <slug> [--strict] [--evidence <paths>...]
     python3 scripts/pdlc.py context-check [--strict]
-    python3 scripts/pdlc.py track <slug> <full|lite> --by "Name" --reason "..."
+    python3 scripts/pdlc.py track <slug> <full|lite> --reason "..."
     python3 scripts/pdlc.py story <slug> <story-id>
     python3 scripts/pdlc.py stages [--track lite]
     python3 scripts/pdlc.py check <slug> handoff --story <story-id>
 
+Who signs: approve, reopen, override and track record the Product Owner named in
+context/team-and-ways-of-working.md. The caller does not supply a name. --by exists
+only as an explicit override for when that file has no name yet, and it prints a warning.
+On Windows without a POSIX shell, use scripts/pdlc.cmd; elsewhere scripts/pdlc. Both
+just find a working Python and run this file.
+
 Tracks: 'full' runs all stages; 'lite' runs brief > prd > backlog > test > close.
-Init takes --track; the current track is the last TRACK row in the approvals log.
+Init takes --track (default: lite; use --track full for customer-facing, regulated or experiment-driven work).
+The current track is the last TRACK row in the approvals log.
 """
 
 import argparse
@@ -40,22 +47,24 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 WORK_DIRS = ["work", "examples"]
 
 # --------------------------------------------------------------------------
-# Single source of truth for the PDLC flow. CLAUDE.md mirrors this table.
+# Single source of truth for the PDLC flow. CLAUDE.md's stage table is generated from
+# this: run `pdlc.py stages --table`. scripts/validate_template.py fails if they drift.
+# "command", "table_agent" and "table_needs" only affect that Markdown table.
 # --------------------------------------------------------------------------
 STAGES = OrderedDict([
-    ("brief",          {"file": "00-brief.md",            "upstream": [],                              "agent": "you (helped by /new-initiative)"}),
-    ("discovery",      {"file": "01-discovery.md",        "upstream": ["brief"],                       "agent": "discovery-researcher"}),
-    ("opportunity",    {"file": "02-opportunity.md",      "upstream": ["discovery"],                   "agent": "opportunity-framer"}),
-    ("prioritisation", {"file": "03-prioritisation.md",   "upstream": ["opportunity"],                 "agent": "prioritisation-analyst"}),
-    ("prd",            {"file": "04-prd.md",              "upstream": ["prioritisation"],              "agent": "prd-writer"}),
-    ("metrics",        {"file": "05-metrics-plan.md",     "upstream": ["prd"],                         "agent": "metrics-analyst"}),
-    ("backlog",        {"file": "06-backlog.md",          "upstream": ["prd", "metrics"],              "agent": "story-writer"}),
-    ("test",           {"file": "07-test-scenarios.md",   "upstream": ["backlog"],                     "agent": "qa-scenario-designer"}),
-    ("refinement",     {"file": "08-refinement-pack.md",  "upstream": ["backlog", "test"],             "agent": "refinement-facilitator"}),
-    ("release",        {"file": "09-release-plan.md",     "upstream": ["backlog", "test", "metrics"],  "agent": "release-planner"}),
-    ("comms",          {"file": "10-comms.md",            "upstream": ["release"],                     "agent": "stakeholder-comms"}),
-    ("postlaunch",     {"file": "11-post-launch-review.md", "upstream": ["metrics", "release"],        "agent": "metrics-analyst"}),
-    ("close",          {"file": "12-close-report.md",     "upstream": ["backlog", "test"],             "agent": "close-analyst"}),
+    ("brief",          {"file": "00-brief.md",            "upstream": [],                              "agent": "you (helped by /new-initiative)", "command": "/new-initiative", "table_agent": "PO, helped by you"}),
+    ("discovery",      {"file": "01-discovery.md",        "upstream": ["brief"],                       "agent": "discovery-researcher", "command": "/discover"}),
+    ("opportunity",    {"file": "02-opportunity.md",      "upstream": ["discovery"],                   "agent": "opportunity-framer", "command": "/frame"}),
+    ("prioritisation", {"file": "03-prioritisation.md",   "upstream": ["opportunity"],                 "agent": "prioritisation-analyst", "command": "/prioritise"}),
+    ("prd",            {"file": "04-prd.md",              "upstream": ["prioritisation"],              "agent": "prd-writer", "command": "/prd"}),
+    ("metrics",        {"file": "05-metrics-plan.md",     "upstream": ["prd"],                         "agent": "metrics-analyst", "command": "/metrics", "table_agent": "metrics-analyst (plan mode)"}),
+    ("backlog",        {"file": "06-backlog.md",          "upstream": ["prd", "metrics"],              "agent": "story-writer", "command": "/stories"}),
+    ("test",           {"file": "07-test-scenarios.md",   "upstream": ["backlog"],                     "agent": "qa-scenario-designer", "command": "/test-scenarios"}),
+    ("refinement",     {"file": "08-refinement-pack.md",  "upstream": ["backlog", "test"],             "agent": "refinement-facilitator", "command": "/refine"}),
+    ("release",        {"file": "09-release-plan.md",     "upstream": ["backlog", "test", "metrics"],  "agent": "release-planner", "command": "/release"}),
+    ("comms",          {"file": "10-comms.md",            "upstream": ["release"],                     "agent": "stakeholder-comms", "command": "/comms"}),
+    ("postlaunch",     {"file": "11-post-launch-review.md", "upstream": ["metrics", "release"],        "agent": "metrics-analyst", "command": "/post-launch", "table_agent": "metrics-analyst (review mode)"}),
+    ("close",          {"file": "12-close-report.md",     "upstream": ["backlog", "test"],             "agent": "close-analyst", "command": "/close", "table_needs": " (+ delivery evidence)"}),
 ])
 
 # Tracks: which stages an initiative runs. A skipped stage's upstream passes straight
@@ -64,7 +73,8 @@ TRACKS = OrderedDict([
     ("full", list(STAGES)),
     ("lite", ["brief", "prd", "backlog", "test", "close"]),
 ])
-DEFAULT_TRACK = "full"
+DEFAULT_TRACK = "lite"   # what a new initiative starts on; "full" is a deliberate choice
+LEGACY_TRACK = "full"    # initiatives whose log has no TRACK row predate tracks and ran the full flow
 
 # Build specs: one per story in <initiative>/handoff/<story-id>.md, gated like a stage.
 HANDOFF_DIR = "handoff"
@@ -127,8 +137,8 @@ def initiative_dir_for(path):
 
 
 def initiative_track(init_dir):
-    """The current track: the last TRACK row in the approvals log, else the default."""
-    track = DEFAULT_TRACK
+    """The current track: the last TRACK row in the approvals log, else the legacy full flow."""
+    track = LEGACY_TRACK
     p = os.path.join(init_dir, LOG_NAME)
     if os.path.exists(p):
         with open(p, encoding="utf-8") as f:
@@ -538,6 +548,43 @@ def required_context_unfilled():
     return [p for p, tier, _ in context_placeholders() if tier == "REQUIRED"]
 
 
+TEAM_FILE = os.path.join("context", "team-and-ways-of-working.md")
+TEAM_FILE_SHOWN = "context/team-and-ways-of-working.md"
+PO_LINE = re.compile(r"^[ \t]*[-*][ \t]*\*\*Product Owner[^*\n]*\*\*[ \t]*(.*?)[ \t]*$", re.M | re.I)
+
+
+def po_name():
+    """The Product Owner's name from the team context file, or None if it is missing or still a placeholder."""
+    try:
+        with open(os.path.join(ROOT, TEAM_FILE), encoding="utf-8") as f:
+            text = f.read()
+    except OSError:
+        return None
+    m = PO_LINE.search(text)
+    name = m.group(1).strip() if m else ""
+    if not name or PLACEHOLDER.search(name):
+        return None
+    return name
+
+
+def signer(a):
+    """Who the ledger records. Always the PO from the team file; --by only fills in when that has no name."""
+    name = po_name()
+    by = (getattr(a, "by", None) or "").strip()
+    if name:
+        if by and by != name:
+            sys.stderr.write("WARNING: --by '{}' ignored. The ledger records the Product Owner named in {}: {}.\n".format(
+                by, TEAM_FILE_SHOWN, name))
+        return name
+    if by:
+        sys.stderr.write("WARNING: {} has no Product Owner name, so the ledger is recording the --by value '{}' "
+                         "as supplied by the caller. Put the name in that file so it is read from there.\n".format(
+                             TEAM_FILE_SHOWN, by))
+        return by
+    sys.exit("No Product Owner name found. Fill in '**Product Owner (signs off artefacts):**' in {} "
+             "(try /onboard), then run this again.".format(TEAM_FILE_SHOWN))
+
+
 def log(init_dir, action, target, by, note):
     p = os.path.join(init_dir, LOG_NAME)
     new = not os.path.exists(p)
@@ -551,7 +598,22 @@ def log(init_dir, action, target, by, note):
 # --------------------------------------------------------------------------
 # Commands
 # --------------------------------------------------------------------------
+def stage_table_markdown():
+    """The CLAUDE.md stage table (full track), generated from STAGES."""
+    rows = ["| Stage | Command | Agent | Output | Needs approved |", "|---|---|---|---|---|"]
+    for k, v in STAGES.items():
+        rows.append("| {} | `{}` | {} | `{}` | {}{} |".format(
+            k, v["command"], v.get("table_agent", v["agent"]), v["file"],
+            ", ".join(v["upstream"]) or "-", v.get("table_needs", "")))
+    rows.append("| handoff (per story) | `/handoff <slug> <story>` | build-spec-writer | `{}/<story-id>.md` | {} |".format(
+        HANDOFF_DIR, ", ".join(HANDOFF_UPSTREAM)))
+    return "\n".join(rows)
+
+
 def cmd_stages(a):
+    if a.table:
+        print(stage_table_markdown())
+        return
     track = (a.track or DEFAULT_TRACK).lower()
     if track not in TRACKS:
         sys.exit("Unknown track '{}'. Valid: {}".format(track, ", ".join(TRACKS)))
@@ -907,6 +969,9 @@ def _load_for_signoff(path):
 
 
 def cmd_approve(a):
+    if a.force and not (a.reason or "").strip():
+        sys.exit("--force needs --reason, as /override does: say why this skips unapproved upstream.")
+    by = signer(a)
     p, fm, body = _load_for_signoff(a.path)
     d = initiative_dir_for(p)
     status = fm.get("status", "").upper()
@@ -923,20 +988,21 @@ def cmd_approve(a):
         ups = []
     unapproved = [u for u in ups if stage_state(d, u)["status"] != "APPROVED"]
     if unapproved and not a.force:
-        sys.exit("Upstream not approved: {}. Approve those first, or re-run with --force.".format(", ".join(unapproved)))
+        sys.exit("Upstream not approved: {}. Approve those first, or re-run with --force and a --reason.".format(", ".join(unapproved)))
     if "TODO" in body or "[[OPEN]]" in body:
         print("Note: this artefact still contains TODO / [[OPEN]] markers. Approving anyway.")
     fm["status"] = "APPROVED"
-    fm["approved_by"] = a.by
+    fm["approved_by"] = by
     fm["approved_at"] = now()
     fm["approved_hash"] = body_hash(body)
     write_doc(p, fm, body)
-    log(d, "APPROVED", "{} v{}".format(os.path.basename(p), fm.get("version", "?")), a.by,
-        ("FORCED past unapproved upstream. " if a.force else "") + (a.note or ""))
-    print("APPROVED {} v{} by {}.".format(os.path.relpath(p, ROOT), fm.get("version"), a.by))
+    log(d, "APPROVED", "{} v{}".format(os.path.basename(p), fm.get("version", "?")), by,
+        ("FORCED past unapproved upstream: {}. ".format(a.reason.strip()) if a.force else "") + (a.note or ""))
+    print("APPROVED {} v{} by {}.".format(os.path.relpath(p, ROOT), fm.get("version"), by))
 
 
 def cmd_reopen(a):
+    by = signer(a)
     p, fm, body = _load_for_signoff(a.path)
     if fm.get("status", "").upper() != "APPROVED":
         sys.exit("Only APPROVED artefacts can be reopened. This one is {}.".format(fm.get("status")))
@@ -949,20 +1015,22 @@ def cmd_reopen(a):
     for k in ("approved_by", "approved_at", "approved_hash"):
         fm[k] = ""
     write_doc(p, fm, body)
-    log(initiative_dir_for(p), "REOPENED", "{} v{} -> v{}".format(os.path.basename(p), old_v, fm["version"]), a.by, a.reason)
+    log(initiative_dir_for(p), "REOPENED", "{} v{} -> v{}".format(os.path.basename(p), old_v, fm["version"]), by, a.reason)
     print("Reopened {} as DRAFT v{}. Downstream approved artefacts will show as flagged in /status.".format(
         os.path.relpath(p, ROOT), fm["version"]))
 
 
 def cmd_override(a):
+    by = signer(a)
     d = find_initiative(a.slug)
     if not d or (a.stage not in STAGES and a.stage != "handoff"):
         sys.exit("Unknown initiative or stage.")
-    log(d, "GATE OVERRIDE", a.stage, a.by, a.reason)
+    log(d, "GATE OVERRIDE", a.stage, by, a.reason)
     print("Override recorded for '{}'. The agent may now draft it despite unapproved upstream.".format(a.stage))
 
 
 def cmd_track(a):
+    by = signer(a)
     d = find_initiative(a.slug)
     if not d:
         sys.exit("Unknown initiative: {}".format(a.slug))
@@ -973,7 +1041,7 @@ def cmd_track(a):
     if new == old:
         print("{} is already on the {} track.".format(a.slug, old))
         return
-    log(d, "TRACK", new, a.by, "{} -> {}. {}".format(old, new, a.reason))
+    log(d, "TRACK", new, by, "{} -> {}. {}".format(old, new, a.reason))
     print("Track changed for {}: {} -> {}.".format(a.slug, old, new))
     added = [s for s in TRACKS[new] if s not in TRACKS[old]]
     dropped = [s for s in TRACKS[old] if s not in TRACKS[new]]
@@ -1014,7 +1082,7 @@ def main(argv=None):
     ap = argparse.ArgumentParser(description="PO Agent Kit sign-off ledger")
     sub = ap.add_subparsers(dest="cmd")
     sub.required = True
-    p = sub.add_parser("stages"); p.add_argument("--track", default=None); p.set_defaults(fn=cmd_stages)
+    p = sub.add_parser("stages"); p.add_argument("--track", default=None); p.add_argument("--table", action="store_true"); p.set_defaults(fn=cmd_stages)
     p = sub.add_parser("init"); p.add_argument("slug"); p.add_argument("--title", default="")
     p.add_argument("--track", default=DEFAULT_TRACK); p.set_defaults(fn=cmd_init)
     p = sub.add_parser("status"); p.add_argument("slug", nargs="?"); p.set_defaults(fn=cmd_status)
@@ -1024,15 +1092,16 @@ def main(argv=None):
     p.add_argument("--evidence", nargs="+", default=None, help="test files, folders or JUnit XML results")
     p.set_defaults(fn=cmd_trace)
     p = sub.add_parser("track"); p.add_argument("slug"); p.add_argument("track")
-    p.add_argument("--by", required=True); p.add_argument("--reason", required=True); p.set_defaults(fn=cmd_track)
+    p.add_argument("--by", default=None, help="override only when the team file has no PO name"); p.add_argument("--reason", required=True); p.set_defaults(fn=cmd_track)
     p = sub.add_parser("story"); p.add_argument("slug"); p.add_argument("story"); p.set_defaults(fn=cmd_story)
     p = sub.add_parser("context-check"); p.add_argument("--strict", action="store_true")
     p.set_defaults(fn=cmd_context_check)
-    p = sub.add_parser("approve"); p.add_argument("path"); p.add_argument("--by", required=True)
-    p.add_argument("--note", default=""); p.add_argument("--force", action="store_true"); p.set_defaults(fn=cmd_approve)
-    p = sub.add_parser("reopen"); p.add_argument("path"); p.add_argument("--by", required=True)
+    p = sub.add_parser("approve"); p.add_argument("path"); p.add_argument("--by", default=None, help="override only when the team file has no PO name")
+    p.add_argument("--note", default=""); p.add_argument("--force", action="store_true")
+    p.add_argument("--reason", default="", help="required with --force");  p.set_defaults(fn=cmd_approve)
+    p = sub.add_parser("reopen"); p.add_argument("path"); p.add_argument("--by", default=None, help="override only when the team file has no PO name")
     p.add_argument("--reason", required=True); p.set_defaults(fn=cmd_reopen)
-    p = sub.add_parser("override"); p.add_argument("slug"); p.add_argument("stage"); p.add_argument("--by", required=True)
+    p = sub.add_parser("override"); p.add_argument("slug"); p.add_argument("stage"); p.add_argument("--by", default=None, help="override only when the team file has no PO name")
     p.add_argument("--reason", required=True); p.set_defaults(fn=cmd_override)
     for sp in sub.choices.values():
         if "--at" not in sp._option_string_actions:

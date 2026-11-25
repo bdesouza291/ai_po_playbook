@@ -9,8 +9,8 @@ Run the **close** stage following the *Stage run protocol* in CLAUDE.md.
 
 - Arguments: `$ARGUMENTS`. The first word is the slug. Then come the evidence paths: test result files (JUnit XML is best), test folders or feature files, typically from the product repo or a CI export. Anything after them is the PO's feedback.
 - If no evidence path is given, ask for one. Explain that results files (JUnit XML from CI) give pass and fail status; test source folders only show that a test *exists*.
-- **Gate check:** `python3 scripts/pdlc.py check <slug> close`
-- **Delivery evidence:** `python3 scripts/pdlc.py trace <slug> --evidence <paths>`. Pass its full output to the agent as the source of truth.
+- **Gate check:** `scripts/pdlc check <slug> close`
+- **Delivery evidence:** `scripts/pdlc trace <slug> --evidence <paths>`. Pass its full output to the agent as the source of truth.
 - Subagent: `close-analyst`
 - Output: `work/<slug>/12-close-report.md`
 - Template: `templates/12-close-report.md`

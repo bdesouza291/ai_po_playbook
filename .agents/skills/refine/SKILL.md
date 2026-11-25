@@ -8,7 +8,7 @@ disable-model-invocation: true
 Run the **refinement** stage following the *Stage run protocol* in CLAUDE.md.
 
 - Arguments: `$ARGUMENTS` (the first word is the initiative slug; anything after it is the PO's feedback, pass it to the agent word for word)
-- Gate check: `python3 scripts/pdlc.py check <slug> refinement`
+- Gate check: `scripts/pdlc check <slug> refinement`
 - Subagent: `refinement-facilitator`
 - Output: `work/<slug>/08-refinement-pack.md`
 - Template: `templates/08-refinement-pack.md`

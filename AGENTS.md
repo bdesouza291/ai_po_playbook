@@ -28,6 +28,7 @@ Before a commit, run:
 python scripts/validate_template.py
 python scripts/test_pdlc.py
 python scripts/test_guard.py
+python scripts/test_sync_mirror.py
 python scripts/pdlc.py context-check
 python scripts/pdlc.py trace flexpay-early-upgrade
 ```
@@ -36,4 +37,4 @@ On Linux or macOS, use `python3` if that is the available interpreter.
 
 ## Cross-agent setup
 
-Reusable skills mirror the Claude definitions under `.agents/skills/`. Prefer the mirror for Codex, Cursor and other agents that read `.agents/skills/`. After changing `.claude/skills/`, mirror it and run `validate_template.py`.
+Reusable skills mirror the Claude definitions under `.agents/skills/`. Prefer the mirror for Codex, Cursor and other agents that read `.agents/skills/`. After changing `.claude/skills/`, run `python scripts/sync_mirror.py` (never edit `.agents/skills/` by hand), then `validate_template.py`.

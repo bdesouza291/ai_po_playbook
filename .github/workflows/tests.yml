@@ -17,6 +17,10 @@ jobs:
           python-version: "3.12"
       - name: Validate template
         run: python3 scripts/validate_template.py
+      - name: Check skills mirror is in sync
+        run: python3 scripts/sync_mirror.py --check
+      - name: Test skills mirror CLI
+        run: python3 scripts/test_sync_mirror.py
       - name: Test PDLC ledger
         run: python3 scripts/test_pdlc.py
       - name: Test sign-off guard

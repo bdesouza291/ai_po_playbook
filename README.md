@@ -28,13 +28,13 @@ AI can draft a PRD or forty stories in minutes. That's only useful if the drafts
 
 Each box is drafted by an agent and approved by the PO. A solid arrow means "can't start until the upstream box is approved". The build itself happens outside the kit, from approved build specs. One initiative = one folder under `work/<slug>/`.
 
-### Two tracks: full and lite
-Not everything needs twelve gates. Each initiative picks a track at `/new-initiative`, and the PO can switch it later with `/track`. The switch is logged.
+### Two tracks: lite and full
+Not everything needs thirteen gates, so a new initiative starts on **lite**. Choosing **full** is a deliberate step you take at `/new-initiative` (or `pdlc init --track full`), and the PO can switch either way later with `/track`. The switch is logged.
 
 | Track | Stages | Use it for |
 |---|---|---|
-| **full** | all of the above | customer-facing, regulated, A/B-tested, or needing stakeholder comms |
-| **lite** | brief → PRD → backlog → test → build specs → close | small, low-risk changes, internal tools, spikes |
+| **lite** (default) | brief → PRD → backlog → test → build specs → close | small, low-risk changes, internal tools, spikes |
+| **full** (opt in) | all of the above | customer-facing, regulated, experiment-driven (A/B-tested) work, or anything needing stakeholder comms |
 
 On lite, a skipped stage's gate passes straight through: the PRD gates on the brief. The agents are told what was skipped, and mark missing goals or baselines `[[OPEN]]` instead of inventing them.
 
@@ -95,8 +95,9 @@ Plus `/onboard`, `/new-initiative`, `/track`, `/status`, `/next`, `/approve`, `/
 | Layer | What it does |
 |---|---|
 | **Hook** (`.claude/hooks/guard.py`) | Blocks editing an approved artefact, writing `status: APPROVED`, or touching the approvals log. This covers the file tools and the shell, both Bash and PowerShell: redirects, in-place edits, moves and deletes. `scripts/test_guard.py` proves the rules hold. |
-| **Permission prompt** (`.claude/settings.json`) | Approve/reopen/override go through `scripts/pdlc.py` and Claude Code asks you every time, from Bash or PowerShell. The prompt *is* the sign-off. |
-| **Fingerprint** | On approval the script hashes the content; later edits show `CHANGED SINCE APPROVAL` and close downstream gates. |
+| **Permission prompt** (`.claude/settings.json`) | Approve, reopen, override and track go through the `scripts/pdlc` wrapper (`scripts/pdlc.cmd` in PowerShell) and Claude Code asks you every time. **The human act is that prompt: you clicking Allow.** Nothing else verifies who you are. |
+| **Ledger** (`scripts/pdlc.py`, `approvals-log.md`) | Records *what* was approved, *when*, and whether it has *changed since*. The signer's name is read from the Product Owner line in `context/team-and-ways-of-working.md`, never supplied by the agent. `--by` exists only as a warned fallback when that file has no name. `approve --force` and `override` both require a reason. |
+| **Fingerprint** | On approval the script hashes the content; later edits show `CHANGED SINCE APPROVAL` and close downstream gates. This is how the ledger knows whether it changed since. |
 | **Staleness** | If an upstream artefact is reopened and re-approved, downstream artefacts approved earlier show `STALE`. |
 
 `context/status-legend.md` explains how the softer status words (In Review, In Refinement, …) relate to the hard ledger gate.
@@ -128,11 +129,11 @@ Swap the context files on day one — product, customers, systems, team, DoR/DoD
 
 ## Cross-agent use
 
-The Claude skill definitions are maintained under `.claude/skills/` and mirrored under `.agents/skills/` for agents that use the `.agents` skill format.
+The Claude skill definitions are maintained under `.claude/skills/` and mirrored under `.agents/skills/` for agents that use the `.agents` skill format. The mirror is generated: after changing a skill, run `python scripts/sync_mirror.py`.
 
 - Read `AGENTS.md` for repository-maintaining rules.
 - Read `CLAUDE.md` for Claude-specific stage routing and the approval protocol.
-- Run `python scripts/validate_template.py` after adding or changing a skill.
+- Run `python scripts/sync_mirror.py` after adding or changing a skill, then `python scripts/validate_template.py`. Never edit `.agents/skills/` by hand.
 - Keep real approval actions in the human-controlled ledger commands; a mirrored skill must not approve by itself.
 
 GitHub Actions runs the template validator and both regression suites on pushes and pull requests.
@@ -142,7 +143,7 @@ GitHub Actions runs the template validator and both regression suites on pushes 
 - **Agents are confidently wrong sometimes.** Every artefact is reviewed, every number cites a source or says "Assumed", and the critic spot-checks. Read the drafts properly.
 - **The regulatory notes are prompts for Compliance, not legal advice.** Agents never say something is compliant.
 - **The guard is a safety net, not security.** It stops honest mistakes and AI shortcuts, not someone editing files by hand, and it needs Python (`/setup-check` tests it).
-- **Usage limits.** A full twelve-stage run in one go will hit Pro-plan limits; run a stage or two per session.
+- **Usage limits.** A full thirteen-stage run in one go will hit Pro-plan limits; run a stage or two per session.
 
 ## Repo layout
 
@@ -154,20 +155,22 @@ GitHub Actions runs the template validator and both regression suites on pushes 
   settings.json  permission rules and hook wiring
 .agents/
   README.md      cross-agent skill mirror instructions
-  skills/        mirror of the Claude skill definitions
+  skills/        generated mirror of the Claude skills (scripts/sync_mirror.py)
 CLAUDE.md        orchestration rules, stable-ID discipline
 AGENTS.md        repository-maintenance rules for all coding agents
 context/
   product-context, team, writing-style, regulatory-notes, quality-rubrics,
-  glossary, status-legend
+  glossary, status-legend, agent-operating-rules (read by every stage agent)
   policies/      your org's policy documents (empty by default)
 templates/       one template per stage, plus handoff-spec.md (build spec per story)
 scripts/
+  pdlc, pdlc.cmd thin wrappers that find a working Python and run pdlc.py (the commands Claude is permitted to run)
   pdlc.py        sign-off ledger: init, status, check, approve, reopen, override, track,
-                 trace (+ --evidence), story (verbatim extract), context-check
+                 trace (+ --evidence), story (verbatim extract), stages (--table), context-check
   test_guard.py  proves the sign-off guard's rules (run by /setup-check)
   test_pdlc.py   regression tests for the ledger: tracks, gates, build specs, evidence
-  validate_template.py  validates skill mirrors, release evidence fields and Python syntax
+  sync_mirror.py  copies .claude/skills/ to .agents/skills/ (--check fails if stale)
+  validate_template.py  validates the skill mirror, CLAUDE.md stage table, release evidence fields and Python syntax
 work/            your initiatives
 examples/        the worked FlexPlan run, with its own context snapshot
 docs/            cheatsheet, playbook, design notes, setup guide

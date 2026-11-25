@@ -8,7 +8,7 @@ disable-model-invocation: true
 Run the **comms** stage following the *Stage run protocol* in CLAUDE.md.
 
 - Arguments: `$ARGUMENTS` (the first word is the initiative slug; anything after it is the PO's feedback, pass it to the agent word for word)
-- Gate check: `python3 scripts/pdlc.py check <slug> comms`
+- Gate check: `scripts/pdlc check <slug> comms`
 - Subagent: `stakeholder-comms`
 - Output: `work/<slug>/10-comms.md`
 - Template: `templates/10-comms.md`

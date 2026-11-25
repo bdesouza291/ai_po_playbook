@@ -8,7 +8,7 @@ disable-model-invocation: true
 Run the **discovery** stage following the *Stage run protocol* in CLAUDE.md.
 
 - Arguments: `$ARGUMENTS` (the first word is the initiative slug; anything after it is the PO's feedback, pass it to the agent word for word)
-- Gate check: `python3 scripts/pdlc.py check <slug> discovery`
+- Gate check: `scripts/pdlc check <slug> discovery`
 - Subagent: `discovery-researcher`
 - Output: `work/<slug>/01-discovery.md`
 - Template: `templates/01-discovery.md`

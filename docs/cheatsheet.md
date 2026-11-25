@@ -9,7 +9,7 @@ One page. Find what you want to do, run the command. `<slug>` is your initiative
 | Check the kit works on this machine | `/setup-check` |
 | Set the kit up for a new product or team | `/onboard` |
 | See which context files still need filling in | `python scripts/pdlc.py context-check` |
-| Start a new piece of work | `/new-initiative <slug> "One line about it"` (asks: full or lite track) |
+| Start a new piece of work | `/new-initiative <slug> "One line about it"` (asks which track; **lite** is the default, choose **full** for customer-facing, regulated or experiment-driven work) |
 | See which stages a track runs | `python scripts/pdlc.py stages --track lite` |
 | See where everything is up to | `/status` (or `/status <slug>`) |
 | Be told what to do next | `/next <slug>` |
@@ -34,7 +34,7 @@ Each command drafts one artefact. You approve it before the next stage can start
 | Hand one story to developers or an AI coding agent | `/handoff <slug> <story-id>` | `handoff/<story-id>.md` |
 | Check what was delivered against the PRD | `/close <slug> <test results or folder>` | `12-close-report.md` |
 
-**On the lite track** you skip straight from the brief to `/prd`, and there's no metrics, refinement, release, comms or post-launch stage.
+**On the lite track (the default)** you skip straight from the brief to `/prd`, and there's no discovery, opportunity, prioritisation, metrics, refinement, release, comms or post-launch stage. Opt in to **full** when the work is customer-facing, regulated or experiment-driven.
 
 **To revise a draft:** run the same command again with your feedback after the slug, e.g. `/prd <slug> make the error states clearer`.
 
@@ -47,7 +47,7 @@ Each command drafts one artefact. You approve it before the next stage can start
 | Approve a draft | `/approve <path>` |
 | Change something I already approved | `/reopen <path>` (asks for a reason; bumps the version) |
 | Skip a gate on purpose | `/override <slug> <stage>` (asks for a reason; logged) |
-| Move an initiative between full and lite | `/track <slug> <full\|lite> "<reason>"` (logged) |
+| Move an initiative between lite and full | `/track <slug> <full\|lite> "<reason>"` (logged) |
 
 You'll get a permission prompt each time. That prompt **is** the sign-off. Don't tick "don't ask again".
 

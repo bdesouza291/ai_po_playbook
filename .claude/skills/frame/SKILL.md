@@ -8,7 +8,7 @@ disable-model-invocation: true
 Run the **opportunity** stage following the *Stage run protocol* in CLAUDE.md.
 
 - Arguments: `$ARGUMENTS` (the first word is the initiative slug; anything after it is the PO's feedback, pass it to the agent word for word)
-- Gate check: `python3 scripts/pdlc.py check <slug> opportunity`
+- Gate check: `scripts/pdlc check <slug> opportunity`
 - Subagent: `opportunity-framer`
 - Output: `work/<slug>/02-opportunity.md`
 - Template: `templates/02-opportunity.md`

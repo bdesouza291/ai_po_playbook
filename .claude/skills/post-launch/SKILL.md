@@ -8,7 +8,7 @@ disable-model-invocation: true
 Run the **postlaunch** stage following the *Stage run protocol* in CLAUDE.md.
 
 - Arguments: `$ARGUMENTS` (the first word is the initiative slug; anything after it is the PO's feedback, pass it to the agent word for word)
-- Gate check: `python3 scripts/pdlc.py check <slug> postlaunch`
+- Gate check: `scripts/pdlc check <slug> postlaunch`
 - Subagent: `metrics-analyst`
 - Output: `work/<slug>/11-post-launch-review.md`
 - Template: `templates/11-post-launch-review.md`

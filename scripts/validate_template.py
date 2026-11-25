@@ -2,7 +2,9 @@
 """Validation checks for the AI Product Owner template."""
 
 import ast
+import json
 import re
+import subprocess
 import sys
 from pathlib import Path
 
@@ -30,15 +32,14 @@ def frontmatter(path):
 
 def check_skills():
     source = ROOT / ".claude" / "skills"
-    mirror = ROOT / ".agents" / "skills"
     if not source.is_dir():
         errors.append(".claude/skills/ is missing")
         return
 
-    source_names = {p.name for p in source.iterdir() if p.is_dir()}
-    mirror_names = {p.name for p in mirror.iterdir() if p.is_dir()} if mirror.is_dir() else set()
-    for name in sorted(source_names - mirror_names):
-        errors.append(".agents/skills/{} is missing; mirror it from .claude/skills/{}".format(name, name))
+    r = subprocess.run([sys.executable, str(ROOT / "scripts" / "sync_mirror.py"), "--check"],
+                       capture_output=True, text=True)
+    if r.returncode != 0:
+        errors.extend(line for line in r.stdout.splitlines() if line.strip())
 
     for skill in sorted(source.glob("*/SKILL.md")):
         fm = frontmatter(skill)
@@ -58,15 +59,47 @@ def check_skills():
             warnings.append("{}: user-invoked skill has no argument-hint".format(
                 skill.relative_to(ROOT).as_posix()))
 
-        mirrored = mirror / skill.parent.name / "SKILL.md"
-        if mirrored.exists():
-            if skill.read_bytes() != mirrored.read_bytes():
-                errors.append("{}: mirror differs from {}".format(
-                    mirrored.relative_to(ROOT).as_posix(),
-                    skill.relative_to(ROOT).as_posix()))
-        else:
-            errors.append("{}: mirror is missing".format(
-                (mirror / skill.parent.name / "SKILL.md").relative_to(ROOT).as_posix()))
+
+def check_stage_table():
+    """CLAUDE.md's inline stage table must match what pdlc.py generates from STAGES."""
+    gen = subprocess.run([sys.executable, str(ROOT / "scripts" / "pdlc.py"), "stages", "--table"],
+                         capture_output=True, text=True)
+    if gen.returncode != 0:
+        errors.append("pdlc.py stages --table failed: {}".format(gen.stderr.strip()))
+        return
+    expected = gen.stdout.strip()
+    text = (ROOT / "CLAUDE.md").read_text(encoding="utf-8")
+    m = re.search(r"^\| Stage \| Command .*?(?=\n\n|\Z)", text, re.M | re.S)
+    if not m:
+        errors.append("CLAUDE.md: stage table not found")
+    elif m.group(0).strip() != expected:
+        errors.append("CLAUDE.md: stage table differs from STAGES in scripts/pdlc.py; "
+                      "paste the output of: python3 scripts/pdlc.py stages --table")
+
+
+SIGNING_COMMANDS = ("approve", "reopen", "override", "track")
+READ_ONLY_COMMANDS = ("init", "status", "check", "stages", "trace", "story", "context-check")
+
+
+def check_permissions():
+    """Permission rules must target the wrapper, and every pdlc.py command must be classified."""
+    cmds = re.findall(r'sub\.add_parser\("([a-z-]+)"', (ROOT / "scripts" / "pdlc.py").read_text(encoding="utf-8"))
+    for c in cmds:
+        if c not in SIGNING_COMMANDS + READ_ONLY_COMMANDS:
+            errors.append("pdlc.py command {!r} is not classified in validate_template.py: decide whether it "
+                          "needs an 'ask' rule in .claude/settings.json (signing) or is read-only".format(c))
+    perms = json.loads((ROOT / ".claude" / "settings.json").read_text(encoding="utf-8")).get("permissions", {})
+    for kind in ("allow", "ask"):
+        for rule in perms.get(kind, []):
+            if "pdlc.py" in rule or "python" in rule:
+                errors.append(".claude/settings.json: {} rule {!r} should target the scripts/pdlc wrapper".format(kind, rule))
+    prefixes = {"Bash": "scripts/pdlc", "PowerShell": "scripts/pdlc.cmd"}
+    for tool, prefix in prefixes.items():
+        if "{}({} *)".format(tool, prefix) not in perms.get("allow", []):
+            errors.append(".claude/settings.json: missing allow rule {}({} *)".format(tool, prefix))
+        for c in SIGNING_COMMANDS:
+            if "{}({} {} *)".format(tool, prefix, c) not in perms.get("ask", []):
+                errors.append(".claude/settings.json: missing ask rule {}({} {} *)".format(tool, prefix, c))
 
 
 def check_python():
@@ -102,6 +135,11 @@ def check_required_files():
         ".agents/README.md",
         "scripts/test_pdlc.py",
         "scripts/test_guard.py",
+        "scripts/test_sync_mirror.py",
+        "scripts/sync_mirror.py",
+        "scripts/pdlc",
+        "scripts/pdlc.cmd",
+        "context/agent-operating-rules.md",
     ):
         if not (ROOT / rel).exists():
             errors.append("{}: required file is missing".format(rel))
@@ -126,6 +164,8 @@ def main():
     check_required_files()
     check_skills()
     check_python()
+    check_stage_table()
+    check_permissions()
     check_release_evidence()
     check_markdown_links()
 

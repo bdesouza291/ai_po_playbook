@@ -86,9 +86,49 @@ def main():
             return r.returncode, r.stdout + r.stderr
 
         def approve(path, *extra):
-            return run("approve", path, "--by", "Test PO", *extra)
+            return run("approve", path, *extra)
+
+        # ---------------- who signs: the PO named in the team file ----------------
+        team = os.path.join(tmp, "context", "team-and-ways-of-working.md")
+        template_team = open(team, encoding="utf-8").read()
+        run("init", "who", "--title", "Signer")
+        who = os.path.join(tmp, "work", "who")
+        code, out = approve(os.path.join(who, "00-brief.md"))
+        expect("approve refuses when the team file has no PO name and no --by",
+               code != 0 and "No Product Owner name found" in out, out)
+        expect("a refused approval leaves the brief DRAFT",
+               "status: DRAFT" in open(os.path.join(who, "00-brief.md"), encoding="utf-8").read())
+        code, out = run("approve", os.path.join(who, "00-brief.md"), "--by", "Caller Name")
+        expect("--by is accepted when the team file has no name, with a warning",
+               code == 0 and "WARNING" in out and "supplied by the caller" in out and "by Caller Name" in out, out)
+        run("reopen", os.path.join(who, "00-brief.md"), "--by", "Caller Name", "--reason", "redo")
+        write(team, template_team.replace("<your name>", "Pat Owner"))
+        code, out = approve(os.path.join(who, "00-brief.md"))
+        expect("approve records the PO from the team file", code == 0 and "by Pat Owner" in out, out)
+        run("reopen", os.path.join(who, "00-brief.md"), "--reason", "again")
+        code, out = run("approve", os.path.join(who, "00-brief.md"), "--by", "Someone Else")
+        expect("--by cannot replace the PO named in the team file",
+               code == 0 and "ignored" in out and "by Pat Owner" in out and "Someone Else" not in
+               open(os.path.join(who, "00-brief.md"), encoding="utf-8").read(), out)
+        who_log = open(os.path.join(who, "approvals-log.md"), encoding="utf-8").read()
+        expect("the ledger names the PO from the team file", "| Pat Owner |" in who_log and "Someone Else" not in who_log, who_log)
+        code, out = run("approve", os.path.join(who, "01-discovery.md"), "--force")
+        expect("approve --force without a reason is refused", code != 0 and "--force needs --reason" in out, out)
+        write(os.path.join(who, "01-discovery.md"), doc("discovery", "# Discovery"))
+        code, out = run("approve", os.path.join(who, "01-discovery.md"), "--force", "--reason", "time-boxed spike")
+        expect("approve --force with a reason works and logs it", code == 0, out)
+        who_log = open(os.path.join(who, "approvals-log.md"), encoding="utf-8").read()
+        expect("the forced approval's reason is in the ledger",
+               "FORCED past unapproved upstream: time-boxed spike" in who_log, who_log)
 
         # ---------------- tracks ----------------
+        code, out = run("init", "dflt", "--title", "No track given")
+        expect("init with no --track starts on lite", code == 0 and "Track: lite" in out, out)
+        code, out = run("check", "dflt", "discovery")
+        expect("default (lite) initiative skips discovery", "not part of the lite track" in out, out)
+        os.remove(os.path.join(tmp, "work", "dflt", "approvals-log.md"))
+        code, out = run("status", "dflt")
+        expect("an initiative with no TRACK row is treated as full (pre-tracks legacy)", "track: full" in out, out)
         code, out = run("init", "lt", "--title", "Lite one", "--track", "lite")
         expect("init --track lite records the track", code == 0 and "Track: lite" in out, out)
         lt = os.path.join(tmp, "work", "lt")
@@ -108,7 +148,7 @@ def main():
         code, out = run("status", "lt")
         expect("status shows skipped stages", "SKIPPED (lite)" in out and "track: lite" in out, out)
 
-        code, out = run("track", "lt", "full", "--by", "Test PO", "--reason", "grew bigger")
+        code, out = run("track", "lt", "full", "--reason", "grew bigger")
         expect("track change lite -> full is logged", code == 0 and "lite -> full" in out, out)
         code, out = run("check", "lt", "backlog")
         expect("full: backlog now also needs the metrics plan", "GATE BLOCKED" in out and "05-metrics-plan.md" in out, out)
@@ -116,7 +156,7 @@ def main():
         expect("track rows are in the approvals log", log_text.count("| TRACK |") == 2, log_text)
 
         # ---------------- full-track gates, release and handoff ----------------
-        run("init", "ft", "--title", "Full one")
+        run("init", "ft", "--title", "Full one", "--track", "full")
         ft = os.path.join(tmp, "work", "ft")
         write(os.path.join(ft, "04-prd.md"), doc("prd", PRD))
         write(os.path.join(ft, "05-metrics-plan.md"), doc("metrics", "# Metrics"))
@@ -124,7 +164,7 @@ def main():
         write(os.path.join(ft, "07-test-scenarios.md"), doc("test", TESTS.replace(
             "| TST.010.020.010 | TST.010.020 | DM1-S2 | Happy |\n", "")))  # B has no test yet
         for f in ("05-metrics-plan.md", "06-backlog.md", "07-test-scenarios.md"):
-            approve(os.path.join(ft, f), "--force")
+            approve(os.path.join(ft, f), "--force", "--reason", "test fixture")
         code, out = run("check", "ft", "release")
         expect("release gate blocks a Must requirement without a test",
                "GATE BLOCKED" in out and "TST.010.020 (Must) has no test scenario" in out, out)
@@ -138,7 +178,7 @@ def main():
         code, out = run("check", "ft", "handoff", "--story", "DM1-S1")
         expect("full: handoff also needs the refinement pack", "08-refinement-pack.md is NOT STARTED" in out, out)
         write(os.path.join(ft, "08-refinement-pack.md"), doc("refinement", "# Refinement"))
-        approve(os.path.join(ft, "08-refinement-pack.md"), "--force")
+        approve(os.path.join(ft, "08-refinement-pack.md"), "--force", "--reason", "test fixture")
         code, out = run("check", "ft", "handoff", "--story", "DM1-S1")
         expect("handoff gate opens with backlog, test and refinement approved",
                "GATE OPEN for 'handoff'" in out and "handoff" in out and "DM1-S1.md" in out, out)

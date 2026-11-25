@@ -20,7 +20,7 @@ Unzip the folder somewhere sensible, for example `Documents/po-agent-kit`.
 The first time, Claude Code asks whether you trust the folder. Say yes, otherwise the project's permission rules and hook won't load.
 
 ## 3. Run the setup check
-Type `/setup-check`. It checks Python, the ledger script, and that the sign-off guard blocks what it should. You should see two "blocked" results; that's the guard working.
+Type `/setup-check`. It checks Python, the ledger script (run through the `scripts/pdlc` wrapper, or `scripts/pdlc.cmd` in PowerShell), and that the sign-off guard blocks what it should. You should see two "blocked" results; that's the guard working.
 
 **If the guard tests aren't blocked** (most likely on Windows):
 1. Check which Python command works (step 1).
@@ -32,7 +32,7 @@ Type `/setup-check`. It checks Python, the ledger script, and that the sign-off 
 ## 4. Make it yours
 Edit these before your first real initiative:
 - `context/product-context.md`: product, customers, strategy, systems
-- `context/team-and-ways-of-working.md`: your name as the signing PO, team, DoR, DoD
+- `context/team-and-ways-of-working.md`: your name as the signing PO, team, DoR, DoD. **This name is what the ledger records when you approve**, so approvals stop with a message until it is filled in
 - `context/regulatory-notes.md`: replace with your employer's guidance when you have it
 
 ## 5. Your first initiative
@@ -52,7 +52,7 @@ Answer the brief questions. Then:
 - If you hit a usage limit mid-stage, the draft is already on disk. Pick up where you left off.
 
 ## Approval prompts
-When `/approve` runs, Claude Code shows a permission prompt for `pdlc.py approve`. That's your signature. **Don't choose "don't ask again"**: the project rules keep asking anyway, but it's a good habit. Don't run the kit in bypass-permissions mode.
+When `/approve` runs, Claude Code shows a permission prompt for `scripts/pdlc approve` (or `scripts/pdlc.cmd approve` in PowerShell). Your clicking Allow is the sign-off. The ledger then records your name from the team file, the time and a fingerprint of the content; it does not, and cannot, check who clicked. **Don't choose "don't ask again"**: the project rules keep asking anyway, but it's a good habit. Don't run the kit in bypass-permissions mode.
 
 ## Publishing to GitHub (portfolio)
 1. Read through `examples/` and the context files and make sure you're happy with everything in them. All example data is fictional.

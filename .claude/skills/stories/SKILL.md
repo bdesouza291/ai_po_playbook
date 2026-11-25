@@ -8,7 +8,7 @@ disable-model-invocation: true
 Run the **backlog** stage following the *Stage run protocol* in CLAUDE.md.
 
 - Arguments: `$ARGUMENTS` (the first word is the initiative slug; anything after it is the PO's feedback, pass it to the agent word for word)
-- Gate check: `python3 scripts/pdlc.py check <slug> backlog`
+- Gate check: `scripts/pdlc check <slug> backlog`
 - Subagent: `story-writer`
 - Output: `work/<slug>/06-backlog.md`
 - Template: `templates/06-backlog.md`
